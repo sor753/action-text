@@ -3,13 +3,14 @@ class Post < ApplicationRecord
 
   validates :title, length: { maximum: 32 }, presence: true
 
-  validate :validate_content_length, :validate_attachable_size
+  validate :validate_content_length, :validate_attachable_size, :validate_attachable_count
   #validate :メソッド名
 
   MAX_CONTENT_LENGTH = 50
   ONE_KB = 1024
   MB = 3
   MAX_ATTACHABLE_SIZE = MB * 1_000 * ONE_KB
+  MAX_ATTACHABLE_COUNT = 4
 
   private
 
@@ -49,6 +50,18 @@ class Post < ApplicationRecord
           max_bytes: MAX_ATTACHABLE_SIZE
         )
       end
+    end
+  end
+
+  def validate_attachable_count
+    files = content.body.attachables.length
+    if files > MAX_ATTACHABLE_COUNT
+      errors.add(
+        :base,
+        :contetn_attachment_file_count_over,
+        max_content_attachment_file_count: MAX_ATTACHABLE_COUNT,
+        files: files
+      )
     end
   end
 
